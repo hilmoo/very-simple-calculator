@@ -43,12 +43,13 @@ document.addEventListener("DOMContentLoaded", function () {
       const value = button.innerText;
       const isNumber = button.classList.contains("number");
       const isOperator = button.classList.contains("operator");
+      const isSpecial = button.classList.contains("special");
 
       if (isNumber) {
         await handleNumber(value);
       } else if (isOperator) {
         await handleOperator(value);
-      } else {
+      } else if (isSpecial) {
         await handleSpecialFunctions(value);
       }
 

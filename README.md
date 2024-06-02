@@ -12,7 +12,7 @@ https://tauri.app/v1/guides/getting-started/prerequisites
 cargo tauri dev
 ```
 
-#### BTW, the calculator can only operate on two numbers and cannot use the latest result as input for the next calculation.
+#### BTW, the calculator cannot change the result to decimal or percentage :v.
 
 Credit:
 

@@ -65,6 +65,10 @@ fn handle_number(state: tauri::State<Arc<Mutex<CalculatorState>>>, num: String) 
     let mut state = state.lock().unwrap();
     if state.current_input == "0" && num != "." {
         state.current_input = num;
+    } else if !state.result_input.is_empty() {
+        state.current_input = state.result_input.clone();
+        state.current_input.push_str(&num);
+        state.result_input.clear();
     } else {
         state.current_input.push_str(&num);
     }
@@ -75,10 +79,15 @@ fn handle_operator(state: tauri::State<Arc<Mutex<CalculatorState>>>, op: String)
     let mut state = state.lock().unwrap();
     if !state.operator.is_empty() && !state.previous_input.is_empty() {
         calculate(&mut state);
+    } else if state.result_input.is_empty() {
+        state.previous_input = state.current_input.clone();
+        state.current_input = "0".to_string();
+    }
+    else if !state.result_input.is_empty() {
+        state.previous_input = state.result_input.clone();
+        state.current_input = "0".to_string();
     }
     state.operator = op;
-    state.previous_input = state.current_input.clone();
-    state.current_input = "0".to_string();
     state.is_decimal_added = false;
 }
 
@@ -93,8 +102,7 @@ fn calculate(state: &mut CalculatorState) {
         _ => return,
     };
     state.result_input = result.to_string();
-    state.operator.clear();
-    state.previous_input = state.current_input.clone();
+    state.current_input = result.to_string();
     state.is_decimal_added = false;
 }
 
