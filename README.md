@@ -12,8 +12,6 @@ https://tauri.app/v1/guides/getting-started/prerequisites
 cargo tauri dev
 ```
 
-#### BTW, the calculator cannot change the result to decimal or percentage :v.
-
 Credit:
 
 UI for the calculator : https://tailwindcomponents.com/component/calculator-ui
