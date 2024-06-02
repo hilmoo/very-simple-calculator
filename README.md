@@ -2,7 +2,7 @@
 
 This project was built for "Pelatihan RUST KMTETI 2024"
 
-<img src="./asset/image.png" alt="preview app" width="600"/>
+<img src="./asset/preview.png" alt="preview app" width="600"/>
 
 ## Prerequisites
 https://tauri.app/v1/guides/getting-started/prerequisites
