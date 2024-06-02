@@ -81,15 +81,23 @@ fn handle_operator(state: tauri::State<Arc<Mutex<CalculatorState>>>, op: String)
     let mut state = state.lock().unwrap();
     if !state.operator.is_empty() && !state.previous_input.is_empty() {
         calculate(&mut state);
-    } else if state.result_input.is_empty() {
+    }
+    if state.result_input.is_empty() {
         state.previous_input = state.current_input.clone();
-        state.current_input = "0".to_string();
-    } else if !state.result_input.is_empty() {
+    } else {
         state.previous_input = state.result_input.clone();
-        state.current_input = "0".to_string();
         state.result_input.clear();
     }
     state.current_input = "0".to_string();
+    state.operator = op;
+}
+
+#[tauri::command]
+fn handle_equal(state: tauri::State<Arc<Mutex<CalculatorState>>>, op: String) {
+    let mut state = state.lock().unwrap();
+    if !state.operator.is_empty() && !state.previous_input.is_empty() {
+        calculate(&mut state);
+    }
     state.operator = op;
 }
 
@@ -168,6 +176,7 @@ fn main() {
             clear,
             handle_number,
             handle_operator,
+            handle_equal,
             handle_special_functions,
             update_result,
             update_prevdisplay,

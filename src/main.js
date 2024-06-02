@@ -15,7 +15,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function updateResult() {
     const currentInput = await window.__TAURI__.invoke("update_result");
-    display.innerText = currentInput;
+    if (currentInput !== "") {
+      display.innerText = currentInput;
+    }
   }
 
   async function clear() {
@@ -56,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
       await updateDisplay();
 
       if (value === "=") {
-        await window.__TAURI__.invoke("handle_operator", { op: "" });
+        await window.__TAURI__.invoke("handle_equal", { op: "" });
         await updateResult();
       }
 
