@@ -63,14 +63,16 @@ fn clear(state: tauri::State<Arc<Mutex<CalculatorState>>>) {
 #[tauri::command]
 fn handle_number(state: tauri::State<Arc<Mutex<CalculatorState>>>, num: String) {
     let mut state = state.lock().unwrap();
-    if state.current_input == "0" && num != "." {
-        state.current_input = num;
-    } else if !state.result_input.is_empty() {
+    if state.result_input.is_empty() {
+        if state.current_input == "0" && num != "." {
+            state.current_input = num;
+        } else {
+            state.current_input.push_str(&num);
+        }
+    } else {
         state.current_input = state.result_input.clone();
         state.current_input.push_str(&num);
         state.result_input.clear();
-    } else {
-        state.current_input.push_str(&num);
     }
 }
 
@@ -82,13 +84,13 @@ fn handle_operator(state: tauri::State<Arc<Mutex<CalculatorState>>>, op: String)
     } else if state.result_input.is_empty() {
         state.previous_input = state.current_input.clone();
         state.current_input = "0".to_string();
-    }
-    else if !state.result_input.is_empty() {
+    } else if !state.result_input.is_empty() {
         state.previous_input = state.result_input.clone();
         state.current_input = "0".to_string();
+        state.result_input.clear();
     }
+    state.current_input = "0".to_string();
     state.operator = op;
-    state.is_decimal_added = false;
 }
 
 fn calculate(state: &mut CalculatorState) {
@@ -101,9 +103,13 @@ fn calculate(state: &mut CalculatorState) {
         "÷" => prev / current,
         _ => return,
     };
+    if result.fract() == 0.0 {
+        state.is_decimal_added = false;
+    } else {
+        state.is_decimal_added = true;
+    }
     state.result_input = result.to_string();
     state.current_input = result.to_string();
-    state.is_decimal_added = false;
 }
 
 #[tauri::command]
@@ -112,15 +118,42 @@ fn handle_special_functions(state: tauri::State<Arc<Mutex<CalculatorState>>>, fu
     match func.as_str() {
         "C" => state.clear(),
         "+/-" => {
-            state.current_input = (-state.current_input.parse::<f64>().unwrap_or(0.0)).to_string();
+            if state.result_input.is_empty() {
+                state.current_input =
+                    (-state.current_input.parse::<f64>().unwrap_or(0.0)).to_string();
+            } else {
+                state.current_input = state.result_input.clone();
+                state.current_input =
+                    (-state.current_input.parse::<f64>().unwrap_or(0.0)).to_string();
+                state.result_input.clear();
+            }
         }
         "%" => {
-            state.current_input = (state.current_input.parse::<f64>().unwrap_or(0.0) / 100.0).to_string();
+            if state.result_input.is_empty() {
+                state.current_input =
+                    (state.current_input.parse::<f64>().unwrap_or(0.0) / 100.0).to_string();
+            } else {
+                state.current_input = state.result_input.clone();
+                state.current_input =
+                    (state.current_input.parse::<f64>().unwrap_or(0.0) / 100.0).to_string();
+                state.result_input.clear();
+            }
         }
         "." => {
-            if !state.is_decimal_added {
-                state.current_input.push('.');
-                state.is_decimal_added = true;
+            if state.result_input.is_empty() {
+                if !state.is_decimal_added {
+                    state.current_input.push('.');
+                    state.is_decimal_added = true;
+                }
+            } else {
+                if !state.is_decimal_added {
+                    state.current_input = state.result_input.clone();
+                    state.current_input.push('.');
+                    state.is_decimal_added = true;
+                } else {
+                    state.current_input = state.result_input.clone();
+                }
+                state.result_input.clear();
             }
         }
         _ => {}
